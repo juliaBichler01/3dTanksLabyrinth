@@ -60,6 +60,20 @@ async function init() {
   controls.maxDistance = 1500;
 
   window.addEventListener("resize", onWindowResize);
+
+  // implement keyborad controls
+  window.addEventListener('keydown', function(event) {
+    if (event.code == "ArrowUp") {
+      moveUp()
+    } else if (event.code == "ArrowDown") {
+      moveDown()
+    } else if (event.code == "ArrowLeft") {
+      moveLeft()
+    }if (event.code == "ArrowRight") {
+      moveRight()
+    }
+  });
+
 }
 
 init().catch(console.error);
@@ -115,5 +129,47 @@ function createCar() {
   car.add(wheel2);
   car.add(wheel3);
   car.add(wheel4);
+
+  car.position.set(360, 0, 400);
   scene.add(car);
 }
+
+//TODO: add better collision handling with different walls
+function moveLeft() {
+  if (car.rotation != (0, Math.PI / 2, 0)) {
+    car.rotation.set(0, Math.PI / 2, 0)
+  }
+
+  // check boundaries
+  if (car.position.x < -400) {
+    return;
+  }  
+
+  car.position.x = car.position.x - 10
+}
+
+function moveRight() {
+  // check boundaries
+  if (car.position.x > 350) {
+    return
+  }
+
+  car.position.x = car.position.x + 10
+    
+}
+
+function moveUp() {
+  // check boundaries
+  if (car.position.z < -400) {
+    return;
+  }
+  car.position.z = car.position.z - 10    
+}
+
+function moveDown() {
+  // check boundaries
+  if (car.position.z > 325) {
+    return;
+  }
+  car.position.z = car.position.z + 10
+  }
