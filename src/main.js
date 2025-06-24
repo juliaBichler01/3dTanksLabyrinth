@@ -97,30 +97,30 @@ function createCar() {
   const geometryBase = new THREE.BoxGeometry(28, 14, 60);
   const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
   const boxBase = new THREE.Mesh(geometryBase, material);
-  boxBase.position.set(20, 12, 40);
+  boxBase.position.set(0, 12, 0);
 
   const geometryTop = new THREE.BoxGeometry(28, 10, 30);
   const boxTop = new THREE.Mesh(geometryTop, material);
-  boxTop.position.set(20, 24, 40);
+  boxTop.position.set(0, 24, 0);
 
   const geometryWheel = new THREE.CylinderGeometry(6, 6, 6, 32);
   const materialWheel = new THREE.MeshBasicMaterial({ color: 0x303030 });
 
   const wheel1 = new THREE.Mesh(geometryWheel, materialWheel);
   wheel1.rotation.set(0, 0, Math.PI / 2);
-  wheel1.position.set(8, 6, 24);
+  wheel1.position.set(-12, 6, -16);
 
   const wheel2 = new THREE.Mesh(geometryWheel, materialWheel);
   wheel2.rotation.set(0, 0, Math.PI / 2);
-  wheel2.position.set(8, 6, 56);
+  wheel2.position.set(-12, 6, 16);
 
   const wheel3 = new THREE.Mesh(geometryWheel, materialWheel);
   wheel3.rotation.set(0, 0, Math.PI / 2);
-  wheel3.position.set(32, 6, 24);
+  wheel3.position.set(12, 6, -16);
 
   const wheel4 = new THREE.Mesh(geometryWheel, materialWheel);
   wheel4.rotation.set(0, 0, Math.PI / 2);
-  wheel4.position.set(32, 6, 56);
+  wheel4.position.set(12, 6, 16);
 
   car = new THREE.Group();
   car.add(boxBase);
@@ -129,12 +129,12 @@ function createCar() {
   car.add(wheel2);
   car.add(wheel3);
   car.add(wheel4);
-
-  car.position.set(360, 0, 400);
+  //car.position.set(360, 0, 400);
   scene.add(car);
 }
 
 //TODO: add better collision handling with different walls
+
 function moveLeft() {
   if (car.rotation != (0, Math.PI / 2, 0)) {
     car.rotation.set(0, Math.PI / 2, 0)
@@ -149,6 +149,10 @@ function moveLeft() {
 }
 
 function moveRight() {
+  if (car.rotation != (0, Math.PI / 2, 0)) {
+    car.rotation.set(0, Math.PI / 2, 0)
+  }
+
   // check boundaries
   if (car.position.x > 350) {
     return
@@ -159,6 +163,10 @@ function moveRight() {
 }
 
 function moveUp() {
+  if (car.rotation != (0, 0, 0)) {
+    car.rotation.set(0, 0, 0)
+  }
+
   // check boundaries
   if (car.position.z < -400) {
     return;
@@ -167,9 +175,13 @@ function moveUp() {
 }
 
 function moveDown() {
+  if (car.rotation != (0, 0, 0)) {
+    car.rotation.set(0, 0, 0)
+  }
+
   // check boundaries
   if (car.position.z > 325) {
     return;
   }
   car.position.z = car.position.z + 10
-  }
+}
