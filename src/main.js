@@ -47,6 +47,7 @@ async function init() {
 
   createBackground();
   createCar();
+  // createWalls();
 
   // renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -68,7 +69,7 @@ function createBackground() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xeeeeee);
 
-  scene.add(new THREE.GridHelper(800, 20));
+  scene.add(new THREE.GridHelper(400, 10));
   scene.add(new THREE.AxesHelper(20));
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 1); // color, intensity
@@ -83,30 +84,30 @@ function createCar() {
   const geometryBase = new THREE.BoxGeometry(28, 14, 60);
   const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
   const boxBase = new THREE.Mesh(geometryBase, material);
-  boxBase.position.set(20, 12, 40);
+  boxBase.position.set(0, 12, 0);
 
   const geometryTop = new THREE.BoxGeometry(28, 10, 30);
   const boxTop = new THREE.Mesh(geometryTop, material);
-  boxTop.position.set(20, 24, 40);
+  boxTop.position.set(0, 24, 0);
 
   const geometryWheel = new THREE.CylinderGeometry(6, 6, 6, 32);
   const materialWheel = new THREE.MeshBasicMaterial({ color: 0x303030 });
 
   const wheel1 = new THREE.Mesh(geometryWheel, materialWheel);
   wheel1.rotation.set(0, 0, Math.PI / 2);
-  wheel1.position.set(8, 6, 24);
+  wheel1.position.set(-12, 6, -16);
 
   const wheel2 = new THREE.Mesh(geometryWheel, materialWheel);
   wheel2.rotation.set(0, 0, Math.PI / 2);
-  wheel2.position.set(8, 6, 56);
+  wheel2.position.set(-12, 6, 16);
 
   const wheel3 = new THREE.Mesh(geometryWheel, materialWheel);
   wheel3.rotation.set(0, 0, Math.PI / 2);
-  wheel3.position.set(32, 6, 24);
+  wheel3.position.set(12, 6, -16);
 
   const wheel4 = new THREE.Mesh(geometryWheel, materialWheel);
   wheel4.rotation.set(0, 0, Math.PI / 2);
-  wheel4.position.set(32, 6, 56);
+  wheel4.position.set(12, 6, 16);
 
   car = new THREE.Group();
   car.add(boxBase);
@@ -116,4 +117,34 @@ function createCar() {
   car.add(wheel3);
   car.add(wheel4);
   scene.add(car);
+}
+
+function createWalls() {
+  const geometryWallHorizontal = new THREE.BoxGeometry(44, 40, 4);
+  const geometryWallVertical = new THREE.BoxGeometry(4, 40, 44);
+  const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
+
+  const wallHorizontal1 = new THREE.Mesh(geometryWallHorizontal, material);
+  wallHorizontal1.position.set(20, 20, 0);
+  scene.add(wallHorizontal1);
+
+  const wallHorizontal2 = new THREE.Mesh(geometryWallHorizontal, material);
+  wallHorizontal2.position.set(20, 20, 80);
+  scene.add(wallHorizontal2);
+
+  const wallVertical1 = new THREE.Mesh(geometryWallVertical, material);
+  wallVertical1.position.set(0, 20, 20);
+  scene.add(wallVertical1);
+
+  const wallVertical2 = new THREE.Mesh(geometryWallVertical, material);
+  wallVertical2.position.set(0, 20, 60);
+  scene.add(wallVertical2);
+
+  const wallVertical3 = new THREE.Mesh(geometryWallVertical, material);
+  wallVertical3.position.set(40, 20, 20);
+  scene.add(wallVertical3);
+
+  const wallVertical4 = new THREE.Mesh(geometryWallVertical, material);
+  wallVertical4.position.set(40, 20, 60);
+  scene.add(wallVertical4);
 }
