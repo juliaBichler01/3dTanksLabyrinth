@@ -76,6 +76,19 @@ async function init() {
       moveRight();
     }
   });
+
+  document.getElementById("buttonRight").addEventListener("click", () => {
+    moveRight();
+  });
+  document.getElementById("buttonLeft").addEventListener("click", () => {
+    moveLeft();
+  });
+  document.getElementById("buttonUp").addEventListener("click", () => {
+    moveUp();
+  });
+  document.getElementById("buttonDown").addEventListener("click", () => {
+    moveDown();
+  });
 }
 
 init().catch(console.error);
@@ -84,7 +97,7 @@ function createBackground() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xeeeeee);
 
-  scene.add(new THREE.GridHelper(400, 10));
+  scene.add(new THREE.GridHelper(600, 10));
   scene.add(new THREE.AxesHelper(20));
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 1); // color, intensity
@@ -131,78 +144,78 @@ function createCar() {
   car.add(wheel2);
   car.add(wheel3);
   car.add(wheel4);
-  car.position.set(-180, 0, 240);
+  car.position.set(-270, 0, 340);
 
   scene.add(car);
 }
 
 function createWalls() {
-  const geometryWallHorizontal = new THREE.BoxGeometry(44, 40, 4);
-  const geometryWallVertical = new THREE.BoxGeometry(4, 40, 44);
+  const geometryWallHorizontal = new THREE.BoxGeometry(64, 40, 4);
+  const geometryWallVertical = new THREE.BoxGeometry(4, 40, 64);
   const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
 
-  const exampleGridVertical = [
-    [1, 0, 0, 1, 1, 0, 0, 1, 1, 0],
-    [0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-    [1, 1, 0, 0, 1, 0, 1, 0, 1, 1],
-    [0, 1, 0, 0, 1, 1, 0, 1, 1, 0],
-    [1, 1, 1, 0, 0, 0, 1, 0, 1, 0],
-    [0, 0, 1, 1, 1, 0, 0, 1, 0, 1],
-    [1, 0, 1, 0, 0, 1, 1, 0, 0, 1],
-    [0, 1, 0, 1, 0, 0, 1, 1, 1, 0],
-    [1, 1, 0, 1, 0, 1, 0, 0, 1, 1],
-  ];
   const exampleGridHorizontal = [
-    [1, 0, 0, 1, 1, 0, 1, 0, 1],
-    [0, 1, 1, 0, 0, 1, 0, 1, 0],
-    [1, 1, 0, 0, 1, 1, 0, 1, 1],
-    [0, 0, 1, 1, 0, 0, 1, 0, 0],
-    [1, 0, 1, 0, 1, 1, 1, 0, 1],
-    [0, 1, 0, 1, 0, 0, 0, 1, 0],
-    [1, 1, 1, 0, 0, 1, 1, 0, 0],
-    [0, 0, 0, 1, 1, 0, 0, 1, 1],
-    [1, 0, 1, 0, 0, 1, 1, 1, 0],
-    [0, 1, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1, 0],
+    [1, 1, 0, 1, 0, 1, 0, 1, 0],
+    [0, 0, 1, 1, 0, 0, 1, 1, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 1, 1, 0, 1, 1, 0, 1, 1],
+    [1, 1, 1, 0, 1, 1, 0, 0, 0],
+    [0, 1, 0, 1, 1, 1, 0, 1, 1],
+    [0, 0, 1, 1, 1, 0, 1, 1, 1],
+    [0, 1, 1, 0, 1, 0, 0, 1, 0],
+    [1, 0, 0, 0, 0, 1, 0, 0, 0],
+  ];
+  const exampleGridVertical = [
+    [0, 0, 0, 1, 1, 1, 1, 0, 0, 1],
+    [0, 1, 1, 0, 0, 1, 0, 1, 0, 0],
+    [1, 1, 0, 0, 1, 1, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 1, 0, 1, 0, 1, 0],
+    [0, 0, 0, 1, 0, 0, 1, 1, 1, 0],
+    [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 0, 0, 0, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 0, 1, 1, 0, 1],
   ];
 
   for (let i = 0; i < 10; i++) {
     for (let j = 0; j < 9; j++) {
       if (exampleGridHorizontal[i][j]) {
         const wallHorizontal = new THREE.Mesh(geometryWallHorizontal, material);
-        wallHorizontal.position.set((i - 4) * 40 - 20, 20, (j - 4) * 40);
+        wallHorizontal.position.set((i - 4) * 60 - 30, 20, (j - 4) * 60);
         scene.add(wallHorizontal);
       }
     }
   }
 
-  // for (let i = 0; i < 9; i++) {
-  //   for (let j = 0; j < 10; j++) {
-  //     if (exampleGridVertical[i][j]) {
-  //       const wallVertical = new THREE.Mesh(geometryWallVertical, material);
-  //       wallVertical.position.set((i - 4) * 40, 20, (j - 4) * 40 - 20);
-  //       scene.add(wallVertical);
-  //     }
-  //   }
-  // }
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 10; j++) {
+      if (exampleGridVertical[i][j]) {
+        const wallVertical = new THREE.Mesh(geometryWallVertical, material);
+        wallVertical.position.set((i - 4) * 60, 20, (j - 4) * 60 - 30);
+        scene.add(wallVertical);
+      }
+    }
+  }
 }
 
 function createBorderWall() {
-  const geometryWallHorizontal = new THREE.BoxGeometry(364, 40, 4);
-  const geometryWallVertical = new THREE.BoxGeometry(4, 40, 404);
+  const geometryWallHorizontal = new THREE.BoxGeometry(544, 40, 4);
+  const geometryWallVertical = new THREE.BoxGeometry(4, 40, 604);
   const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
 
   const wallHorizontal1 = new THREE.Mesh(geometryWallHorizontal, material);
-  wallHorizontal1.position.set(-20, 20, -200);
+  wallHorizontal1.position.set(-30, 20, -300);
   scene.add(wallHorizontal1);
   const wallHorizontal2 = new THREE.Mesh(geometryWallHorizontal, material);
-  wallHorizontal2.position.set(20, 20, 200);
+  wallHorizontal2.position.set(30, 20, 300);
   scene.add(wallHorizontal2);
 
   const wallVertical1 = new THREE.Mesh(geometryWallVertical, material);
-  wallVertical1.position.set(-200, 20, 0);
+  wallVertical1.position.set(-300, 20, 0);
   scene.add(wallVertical1);
   const wallVertical2 = new THREE.Mesh(geometryWallVertical, material);
-  wallVertical2.position.set(200, 20, 0);
+  wallVertical2.position.set(300, 20, 0);
   scene.add(wallVertical2);
 }
 

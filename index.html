@@ -16,45 +16,70 @@
   "
 >
   <style>
-    .arjs-loader {
-      margin: 0 auto;
-      width: 100%;
-      height: 100%;
+    #buttonRight {
       position: absolute;
-      top: 0;
-      left: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .arjs-loader-spinner {
+      bottom: 60px;
+      right: 20px;
       z-index: 10;
-      -webkit-transform: spin 1s linear infinite;
-      animation: spin 1s linear infinite;
-      border: 3px solid #ddd;
-      border-top: 3px solid #42a5f5;
-      border-radius: 50%;
-      height: 75px;
-      width: 75px;
+      padding: 12px 15px;
+      font-size: 20px;
+      background-color: rgba(120, 59, 59, 0.8);
+      color: white;
+      border: none;
+      border-radius: 40px;
+      cursor: pointer;
+    }
+    #buttonLeft {
+      position: absolute;
+      bottom: 60px;
+      right: 100px;
+      z-index: 10;
+      padding: 12px 15px;
+      font-size: 20px;
+      background-color: rgba(120, 59, 59, 0.8);
+      color: white;
+      border: none;
+      border-radius: 40px;
+      cursor: pointer;
+    }
+    #buttonUp {
+      position: absolute;
+      bottom: 100px;
+      right: 60px;
+      z-index: 10;
+      padding: 12px 15px;
+      font-size: 20px;
+      background-color: rgba(120, 59, 59, 0.8);
+      color: white;
+      border: none;
+      border-radius: 40px;
+      cursor: pointer;
+    }
+    #buttonDown {
+      position: absolute;
+      bottom: 20px;
+      right: 60px;
+      z-index: 10;
+      padding: 12px 15px;
+      font-size: 20px;
+      background-color: rgba(120, 59, 59, 0.8);
+      color: white;
+      border: none;
+      border-radius: 40px;
+      cursor: pointer;
     }
 
-    @-webkit-keyframes spin {
-      to {
-        border-top-color: #42a5f5;
-        -webkit-transform: rotate(360deg);
-        transform: rotate(360deg);
-      }
-    }
-
-    @keyframes spin {
-      to {
-        border-top-color: #42a5f5;
-        -webkit-transform: rotate(360deg);
-        transform: rotate(360deg);
-      }
+    #buttonLeft:hover,
+    #buttonRight:hover,
+    #buttonUp:hover,
+    #buttonDown:hover {
+      background-color: rgba(57, 28, 28, 0.8);
     }
   </style>
+  <button id="buttonRight">&rarr;</button>
+  <button id="buttonLeft">&larr;</button>
+  <button id="buttonUp">&uarr;</button>
+  <button id="buttonDown">&darr;</button>
   <script src="/libs/ar-threex.min.js"></script>
   <script type="module" src="src/main.js"></script>
 </body>
