@@ -62,6 +62,20 @@ async function init() {
   controls.maxDistance = 1500;
 
   window.addEventListener("resize", onWindowResize);
+
+  // implement keyborad controls
+  window.addEventListener("keydown", function (event) {
+    if (event.code == "ArrowUp") {
+      moveUp();
+    } else if (event.code == "ArrowDown") {
+      moveDown();
+    } else if (event.code == "ArrowLeft") {
+      moveLeft();
+    }
+    if (event.code == "ArrowRight") {
+      moveRight();
+    }
+  });
 }
 
 init().catch(console.error);
@@ -190,4 +204,56 @@ function createBorderWall() {
   const wallVertical2 = new THREE.Mesh(geometryWallVertical, material);
   wallVertical2.position.set(200, 20, 0);
   scene.add(wallVertical2);
+}
+
+//TODO: add better collision handling with different walls
+
+function moveLeft() {
+  if (car.rotation != (0, Math.PI / 2, 0)) {
+    car.rotation.set(0, Math.PI / 2, 0);
+  }
+
+  // check boundaries
+  if (car.position.x < -400) {
+    return;
+  }
+
+  car.position.x = car.position.x - 10;
+}
+
+function moveRight() {
+  if (car.rotation != (0, Math.PI / 2, 0)) {
+    car.rotation.set(0, Math.PI / 2, 0);
+  }
+
+  // check boundaries
+  if (car.position.x > 350) {
+    return;
+  }
+
+  car.position.x = car.position.x + 10;
+}
+
+function moveUp() {
+  if (car.rotation != (0, 0, 0)) {
+    car.rotation.set(0, 0, 0);
+  }
+
+  // check boundaries
+  if (car.position.z < -400) {
+    return;
+  }
+  car.position.z = car.position.z - 10;
+}
+
+function moveDown() {
+  if (car.rotation != (0, 0, 0)) {
+    car.rotation.set(0, 0, 0);
+  }
+
+  // check boundaries
+  if (car.position.z > 325) {
+    return;
+  }
+  car.position.z = car.position.z + 10;
 }
