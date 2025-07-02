@@ -47,7 +47,8 @@ async function init() {
 
   createBackground();
   createCar();
-  // createWalls();
+  createWalls();
+  createBorderWall();
 
   // renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -116,6 +117,8 @@ function createCar() {
   car.add(wheel2);
   car.add(wheel3);
   car.add(wheel4);
+  car.position.set(-180, 0, 240);
+
   scene.add(car);
 }
 
@@ -124,27 +127,67 @@ function createWalls() {
   const geometryWallVertical = new THREE.BoxGeometry(4, 40, 44);
   const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
 
-  const wallHorizontal1 = new THREE.Mesh(geometryWallHorizontal, material);
-  wallHorizontal1.position.set(20, 20, 0);
-  scene.add(wallHorizontal1);
+  const exampleGridVertical = [
+    [1, 0, 0, 1, 1, 0, 0, 1, 1, 0],
+    [0, 1, 1, 0, 0, 1, 1, 0, 0, 1],
+    [1, 1, 0, 0, 1, 0, 1, 0, 1, 1],
+    [0, 1, 0, 0, 1, 1, 0, 1, 1, 0],
+    [1, 1, 1, 0, 0, 0, 1, 0, 1, 0],
+    [0, 0, 1, 1, 1, 0, 0, 1, 0, 1],
+    [1, 0, 1, 0, 0, 1, 1, 0, 0, 1],
+    [0, 1, 0, 1, 0, 0, 1, 1, 1, 0],
+    [1, 1, 0, 1, 0, 1, 0, 0, 1, 1],
+  ];
+  const exampleGridHorizontal = [
+    [1, 0, 0, 1, 1, 0, 1, 0, 1],
+    [0, 1, 1, 0, 0, 1, 0, 1, 0],
+    [1, 1, 0, 0, 1, 1, 0, 1, 1],
+    [0, 0, 1, 1, 0, 0, 1, 0, 0],
+    [1, 0, 1, 0, 1, 1, 1, 0, 1],
+    [0, 1, 0, 1, 0, 0, 0, 1, 0],
+    [1, 1, 1, 0, 0, 1, 1, 0, 0],
+    [0, 0, 0, 1, 1, 0, 0, 1, 1],
+    [1, 0, 1, 0, 0, 1, 1, 1, 0],
+    [0, 1, 0, 0, 1, 0, 0, 0, 1],
+  ];
 
+  for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 9; j++) {
+      if (exampleGridHorizontal[i][j]) {
+        const wallHorizontal = new THREE.Mesh(geometryWallHorizontal, material);
+        wallHorizontal.position.set((i - 4) * 40 - 20, 20, (j - 4) * 40);
+        scene.add(wallHorizontal);
+      }
+    }
+  }
+
+  // for (let i = 0; i < 9; i++) {
+  //   for (let j = 0; j < 10; j++) {
+  //     if (exampleGridVertical[i][j]) {
+  //       const wallVertical = new THREE.Mesh(geometryWallVertical, material);
+  //       wallVertical.position.set((i - 4) * 40, 20, (j - 4) * 40 - 20);
+  //       scene.add(wallVertical);
+  //     }
+  //   }
+  // }
+}
+
+function createBorderWall() {
+  const geometryWallHorizontal = new THREE.BoxGeometry(364, 40, 4);
+  const geometryWallVertical = new THREE.BoxGeometry(4, 40, 404);
+  const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
+
+  const wallHorizontal1 = new THREE.Mesh(geometryWallHorizontal, material);
+  wallHorizontal1.position.set(-20, 20, -200);
+  scene.add(wallHorizontal1);
   const wallHorizontal2 = new THREE.Mesh(geometryWallHorizontal, material);
-  wallHorizontal2.position.set(20, 20, 80);
+  wallHorizontal2.position.set(20, 20, 200);
   scene.add(wallHorizontal2);
 
   const wallVertical1 = new THREE.Mesh(geometryWallVertical, material);
-  wallVertical1.position.set(0, 20, 20);
+  wallVertical1.position.set(-200, 20, 0);
   scene.add(wallVertical1);
-
   const wallVertical2 = new THREE.Mesh(geometryWallVertical, material);
-  wallVertical2.position.set(0, 20, 60);
+  wallVertical2.position.set(200, 20, 0);
   scene.add(wallVertical2);
-
-  const wallVertical3 = new THREE.Mesh(geometryWallVertical, material);
-  wallVertical3.position.set(40, 20, 20);
-  scene.add(wallVertical3);
-
-  const wallVertical4 = new THREE.Mesh(geometryWallVertical, material);
-  wallVertical4.position.set(40, 20, 60);
-  scene.add(wallVertical4);
 }
