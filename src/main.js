@@ -48,6 +48,8 @@ async function init() {
   createBackground();
   createCar();
 
+  // for testing: addWalls();
+
   // renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -93,6 +95,9 @@ function createBackground() {
   scene.add(directionalLight);
 }
 
+
+let car_boundingBox = new THREE.Box3();
+
 function createCar() {
   const geometryBase = new THREE.BoxGeometry(28, 14, 60);
   const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
@@ -129,23 +134,78 @@ function createCar() {
   car.add(wheel2);
   car.add(wheel3);
   car.add(wheel4);
-  //car.position.set(360, 0, 400);
+
+  car.position.set(360, 0, 400);
+
   scene.add(car);
 }
 
-//TODO: add better collision handling with different walls
+
+let walls = [];
+
+//TODO: function used to test/devolp collision logic. Remove before submitting
+function addWalls() {
+  const geometryBase = new THREE.BoxGeometry(450, 100, 10);
+  const material = new THREE.MeshStandardMaterial({ color: 0x0fff00 });
+
+  const wall1 = new THREE.Mesh(geometryBase, material);
+  wall1.position.set(-150, 50, 0);
+
+  const wall2 = new THREE.Mesh(geometryBase, material);
+  wall2.position.set(150, 50, -150);
+
+  const wall3 = new THREE.Mesh(geometryBase, material);
+  wall3.position.set(150, 50, 150);
+
+  const vert_geometryBase = new THREE.BoxGeometry(10, 100, 150);
+  const wall4 = new THREE.Mesh(vert_geometryBase, material);
+  wall4.position.set(0, 50, 350);
+
+  scene.add(wall1);
+  scene.add(wall2);
+  scene.add(wall3);
+  scene.add(wall4);
+
+  walls = [wall1, wall2, wall3, wall4];
+
+}
+
+function checkForIntersection() {
+  car_boundingBox.setFromObject( car );
+
+  for (var i = 0; i < walls.length; i++) {
+    // get bounding box of wall
+    let bounding_box = new THREE.Box3();
+    bounding_box.setFromObject( walls[i] );
+
+    if (bounding_box.intersectsBox(car_boundingBox)) {
+      // ---- for debugging
+      //walls[i].material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+      // ----
+
+      return true;
+    }
+  }
+  return false;
+
+}
 
 function moveLeft() {
   if (car.rotation != (0, Math.PI / 2, 0)) {
     car.rotation.set(0, Math.PI / 2, 0)
   }
 
-  // check boundaries
-  if (car.position.x < -400) {
+  // check wall boundaries
+  if (car.position.x < -350) {
     return;
   }  
 
   car.position.x = car.position.x - 10
+
+  if (checkForIntersection()) {
+    moveRight();
+  }
+
 }
 
 function moveRight() {
@@ -153,13 +213,16 @@ function moveRight() {
     car.rotation.set(0, Math.PI / 2, 0)
   }
 
-  // check boundaries
+  // check wall boundaries
   if (car.position.x > 350) {
     return
   }
 
   car.position.x = car.position.x + 10
-    
+
+  if (checkForIntersection()) {
+    moveLeft();
+  }   
 }
 
 function moveUp() {
@@ -167,11 +230,14 @@ function moveUp() {
     car.rotation.set(0, 0, 0)
   }
 
-  // check boundaries
-  if (car.position.z < -400) {
+  // check wall boundaries
+  if (car.position.z < -350) {
     return;
   }
   car.position.z = car.position.z - 10    
+  if (checkForIntersection()) {
+    moveDown();
+  }
 }
 
 function moveDown() {
@@ -179,9 +245,13 @@ function moveDown() {
     car.rotation.set(0, 0, 0)
   }
 
-  // check boundaries
-  if (car.position.z > 325) {
+  // check wall boundaries
+  if (car.position.z > 350) {
     return;
   }
   car.position.z = car.position.z + 10
+  if (checkForIntersection()) {
+    moveUp();
+  }
+
 }
