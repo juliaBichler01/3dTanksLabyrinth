@@ -6,6 +6,9 @@ import "./styles.css";
 window.THREE = THREE;
 
 let camera, renderer, scene, car;
+let walls = [];
+let wallBoundingBoxes = [];
+
 
 // Dynamically load ar-threex.min.js AFTER setting window.THREE
 function loadScript(src) {
@@ -45,10 +48,13 @@ async function init() {
   );
   camera.position.set(0, 1000, 1000);
 
+  // create objects in scene
   createBackground();
   createCar();
+  createWalls();
+  createBorderWall();
 
-  // for testing: addWalls();
+  getWallBoundingBoxes();
 
   // renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -66,14 +72,27 @@ async function init() {
   // implement keyborad controls
   window.addEventListener('keydown', function(event) {
     if (event.code == "ArrowUp") {
-      moveUp()
+      moveCar("up")
     } else if (event.code == "ArrowDown") {
-      moveDown()
+      moveCar("down")
     } else if (event.code == "ArrowLeft") {
-      moveLeft()
+      moveCar("left")
     }if (event.code == "ArrowRight") {
-      moveRight()
+      moveCar("right")
     }
+  });
+
+  document.getElementById("buttonRight").addEventListener("click", () => {
+    moveCar("right");
+  });
+  document.getElementById("buttonLeft").addEventListener("click", () => {
+    moveCar("left");
+  });
+  document.getElementById("buttonUp").addEventListener("click", () => {
+    moveCar("up");
+  });
+  document.getElementById("buttonDown").addEventListener("click", () => {
+    moveCar("down");
   });
 
 }
@@ -94,9 +113,6 @@ function createBackground() {
   directionalLight.position.set(-400, 1000, -500); // position it above the box
   scene.add(directionalLight);
 }
-
-
-let car_boundingBox = new THREE.Box3();
 
 function createCar() {
   const geometryBase = new THREE.BoxGeometry(28, 14, 60);
@@ -135,123 +151,146 @@ function createCar() {
   car.add(wheel3);
   car.add(wheel4);
 
-  car.position.set(360, 0, 400);
+  car.position.set(-270, 0, 340);
 
   scene.add(car);
 }
 
+function createWalls() {
+  const geometryWallHorizontal = new THREE.BoxGeometry(64, 40, 4);
+  const geometryWallVertical = new THREE.BoxGeometry(4, 40, 64);
+  const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
 
-let walls = [];
+  const exampleGridHorizontal = [
+    [1, 0, 0, 0, 0, 0, 0, 1, 0],
+    [1, 1, 0, 1, 0, 1, 0, 1, 0],
+    [0, 0, 1, 1, 0, 0, 1, 1, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 1, 1, 0, 1, 1, 0, 1, 1],
+    [1, 1, 1, 0, 1, 1, 0, 0, 0],
+    [0, 1, 0, 1, 1, 1, 0, 1, 1],
+    [0, 0, 1, 1, 1, 0, 1, 1, 1],
+    [0, 1, 1, 0, 1, 0, 0, 1, 0],
+    [1, 0, 0, 0, 0, 1, 0, 0, 0],
+  ];
+  const exampleGridVertical = [
+    [0, 0, 0, 1, 1, 1, 1, 0, 0, 1],
+    [0, 1, 1, 0, 0, 1, 0, 1, 0, 0],
+    [1, 1, 0, 0, 1, 1, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 1, 0, 1, 0, 1, 0],
+    [0, 0, 0, 1, 0, 0, 1, 1, 1, 0],
+    [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 0, 0, 0, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 0, 1, 1, 0, 1],
+  ];
 
-//TODO: function used to test/devolp collision logic. Remove before submitting
-function addWalls() {
-  const geometryBase = new THREE.BoxGeometry(450, 100, 10);
-  const material = new THREE.MeshStandardMaterial({ color: 0x0fff00 });
-
-  const wall1 = new THREE.Mesh(geometryBase, material);
-  wall1.position.set(-150, 50, 0);
-
-  const wall2 = new THREE.Mesh(geometryBase, material);
-  wall2.position.set(150, 50, -150);
-
-  const wall3 = new THREE.Mesh(geometryBase, material);
-  wall3.position.set(150, 50, 150);
-
-  const vert_geometryBase = new THREE.BoxGeometry(10, 100, 150);
-  const wall4 = new THREE.Mesh(vert_geometryBase, material);
-  wall4.position.set(0, 50, 350);
-
-  scene.add(wall1);
-  scene.add(wall2);
-  scene.add(wall3);
-  scene.add(wall4);
-
-  walls = [wall1, wall2, wall3, wall4];
-
-}
-
-function checkForIntersection() {
-  car_boundingBox.setFromObject( car );
-
-  for (var i = 0; i < walls.length; i++) {
-    // get bounding box of wall
-    let bounding_box = new THREE.Box3();
-    bounding_box.setFromObject( walls[i] );
-
-    if (bounding_box.intersectsBox(car_boundingBox)) {
-      // ---- for debugging
-      //walls[i].material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-      // ----
-
-      return true;
+  for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 9; j++) {
+      if (exampleGridHorizontal[i][j]) {
+        const wallHorizontal = new THREE.Mesh(geometryWallHorizontal, material);
+        wallHorizontal.position.set((i - 4) * 60 - 30, 20, (j - 4) * 60);
+        scene.add(wallHorizontal);
+        walls.push(wallHorizontal)
+      }
     }
   }
-  return false;
 
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 10; j++) {
+      if (exampleGridVertical[i][j]) {
+        const wallVertical = new THREE.Mesh(geometryWallVertical, material);
+        wallVertical.position.set((i - 4) * 60, 20, (j - 4) * 60 - 30);
+        scene.add(wallVertical);
+        walls.push(wallVertical)
+      }
+    }
+  }
 }
 
-function moveLeft() {
-  if (car.rotation != (0, Math.PI / 2, 0)) {
-    car.rotation.set(0, Math.PI / 2, 0)
-  }
+function createBorderWall() {
+  const geometryWallHorizontal = new THREE.BoxGeometry(544, 40, 4);
+  const geometryWallVertical = new THREE.BoxGeometry(4, 40, 604);
+  const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
 
-  // check wall boundaries
-  if (car.position.x < -350) {
-    return;
-  }  
+  const wallHorizontal1 = new THREE.Mesh(geometryWallHorizontal, material);
+  wallHorizontal1.position.set(-30, 20, -300);
+  scene.add(wallHorizontal1);
+  walls.push(wallHorizontal1)
+  const wallHorizontal2 = new THREE.Mesh(geometryWallHorizontal, material);
+  wallHorizontal2.position.set(30, 20, 300);
+  scene.add(wallHorizontal2);
+  walls.push(wallHorizontal2)
 
-  car.position.x = car.position.x - 10
-
-  if (checkForIntersection()) {
-    moveRight();
-  }
-
+  const wallVertical1 = new THREE.Mesh(geometryWallVertical, material);
+  wallVertical1.position.set(-300, 20, 0);
+  scene.add(wallVertical1);
+  walls.push(wallVertical1)
+  const wallVertical2 = new THREE.Mesh(geometryWallVertical, material);
+  wallVertical2.position.set(300, 20, 0);
+  scene.add(wallVertical2);
+  walls.push(wallVertical2)
 }
 
-function moveRight() {
-  if (car.rotation != (0, Math.PI / 2, 0)) {
-    car.rotation.set(0, Math.PI / 2, 0)
+function checkForIntersection(direction) {
+  var new_car = car.clone(true);
+  let new_car_boundingBox = new THREE.Box3();
+
+  if (direction == "left") {
+    new_car.rotation.set(0, Math.PI / 2, 0)
+    new_car.position.x = car.position.x - 10
+  } else if (direction == "right") {
+    new_car.rotation.set(0, Math.PI / 2, 0)
+    new_car.position.x = car.position.x + 10
+  } else if (direction == "up") {
+    new_car.rotation.set(0, 0, 0)
+    new_car.position.z = car.position.z - 10
+  } else if (direction == "down") {
+    new_car.rotation.set(0, 0, 0)
+    new_car.position.z = car.position.z + 10
+  }
+  
+  new_car_boundingBox.setFromObject(new_car);
+
+  for (var i = 0; i < wallBoundingBoxes.length; i++) {
+    if (wallBoundingBoxes[i].intersectsBox(new_car_boundingBox)) {
+      //walls[i].material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+      return true
+    }
   }
 
-  // check wall boundaries
-  if (car.position.x > 350) {
+  return false
+}
+
+function getWallBoundingBoxes() {
+
+  for (var i = 0; i < walls.length; i++) {
+    let bounding_box = new THREE.Box3();
+    bounding_box.setFromObject(walls[i]);
+
+    wallBoundingBoxes.push(bounding_box);
+  }
+}
+
+function moveCar(direction) {
+
+  // make sure that moving in this direction doesn't cause an intersection
+  if (checkForIntersection(direction)) {
     return
   }
 
-  car.position.x = car.position.x + 10
-
-  if (checkForIntersection()) {
-    moveLeft();
-  }   
-}
-
-function moveUp() {
-  if (car.rotation != (0, 0, 0)) {
+  // change the car position
+  if (direction == "left") {
+    car.rotation.set(0, Math.PI / 2, 0)
+    car.position.x = car.position.x - 10
+  } else if (direction == "right") {
+    car.rotation.set(0, Math.PI / 2, 0)
+    car.position.x = car.position.x + 10
+  } else if (direction == "up") {
     car.rotation.set(0, 0, 0)
-  }
-
-  // check wall boundaries
-  if (car.position.z < -350) {
-    return;
-  }
-  car.position.z = car.position.z - 10    
-  if (checkForIntersection()) {
-    moveDown();
-  }
-}
-
-function moveDown() {
-  if (car.rotation != (0, 0, 0)) {
+    car.position.z = car.position.z - 10
+  } else if (direction == "down") {
     car.rotation.set(0, 0, 0)
+    car.position.z = car.position.z + 10
   }
-
-  // check wall boundaries
-  if (car.position.z > 350) {
-    return;
-  }
-  car.position.z = car.position.z + 10
-  if (checkForIntersection()) {
-    moveUp();
-  }
-
 }
