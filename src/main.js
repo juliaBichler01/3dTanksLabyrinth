@@ -5,9 +5,10 @@ import "./styles.css";
 // Expose THREE globally for AR.js
 window.THREE = THREE;
 
-let camera, renderer, scene, car;
+let camera, renderer, scene, car, loader;
 let walls = [];
 let wallBoundingBoxes = [];
+let labyrinthSource = "/assets/labyrinth_01.jpg";
 
 // Dynamically load ar-threex.min.js AFTER setting window.THREE
 function loadScript(src) {
@@ -50,10 +51,7 @@ async function init() {
   // create objects in scene
   createBackground();
   createCar();
-  createWalls();
-  createBorderWall();
 
-  // for testing: addWalls();
   detectWalls();
 
   // renderer
@@ -95,6 +93,68 @@ async function init() {
   document.getElementById("buttonDown").addEventListener("click", () => {
     moveCar("down");
   });
+
+  const fileInput = document.getElementById("fileInput");
+  const overlayImage = document.getElementById("overlayImage");
+  const overlayText = document.getElementById("overlayText");
+
+  fileInput.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith("image/jpeg")) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        overlayImage.src = e.target.result;
+        overlayText.textContent = "Current Image: " + file.name; // Show the file name
+        labyrinthSource = e.target.result;
+        detectWalls();
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  const takePhotoButton = document.getElementById("takePhotoButton");
+  const captureButton = document.getElementById("captureButton");
+  const webcam = document.getElementById("webcam");
+
+  takePhotoButton.addEventListener("click", async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      webcam.srcObject = stream;
+      webcam.style.display = "block";
+      captureButton.style.display = "block"; // 👈 Show the capture button
+
+      captureButton.onclick = () => {
+        const ctx = snapshotCanvas.getContext("2d");
+        snapshotCanvas.width = webcam.videoWidth;
+        snapshotCanvas.height = webcam.videoHeight;
+        ctx.drawImage(
+          webcam,
+          0,
+          0,
+          snapshotCanvas.width,
+          snapshotCanvas.height
+        );
+
+        const imageDataURL = snapshotCanvas.toDataURL("image/jpeg");
+
+        // Stop webcam stream
+        stream.getTracks().forEach((track) => track.stop());
+
+        // Hide webcam and button
+        webcam.style.display = "none";
+        captureButton.style.display = "none";
+
+        // Use the captured image
+        overlayImage.src = imageDataURL;
+        overlayText.textContent = "Captured Image";
+        labyrinthSource = imageDataURL;
+        detectWalls();
+      };
+    } catch (err) {
+      alert("Webcam access denied or unavailable.");
+      console.error(err);
+    }
+  });
 }
 
 init().catch(console.error);
@@ -113,8 +173,6 @@ function createBackground() {
   directionalLight.position.set(-400, 1000, -500); // position it above the box
   scene.add(directionalLight);
 }
-
-let car_boundingBox = new THREE.Box3();
 
 function createCar() {
   const geometryBase = new THREE.BoxGeometry(28, 14, 60);
@@ -152,95 +210,17 @@ function createCar() {
   car.add(wheel2);
   car.add(wheel3);
   car.add(wheel4);
-  car.position.set(-270, 0, 340);
+  car.position.set(-405, 0, 450);
 
   scene.add(car);
 }
 
-function createWalls() {
-  const geometryWallHorizontal = new THREE.BoxGeometry(64, 40, 4);
-  const geometryWallVertical = new THREE.BoxGeometry(4, 40, 64);
-  const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
-
-  const exampleGridHorizontal = [
-    [1, 0, 0, 0, 0, 0, 0, 1, 0],
-    [1, 1, 0, 1, 0, 1, 0, 1, 0],
-    [0, 0, 1, 1, 0, 0, 1, 1, 1],
-    [1, 0, 1, 1, 0, 1, 1, 0, 1],
-    [1, 1, 1, 0, 1, 1, 0, 1, 1],
-    [1, 1, 1, 0, 1, 1, 0, 0, 0],
-    [0, 1, 0, 1, 1, 1, 0, 1, 1],
-    [0, 0, 1, 1, 1, 0, 1, 1, 1],
-    [0, 1, 1, 0, 1, 0, 0, 1, 0],
-    [1, 0, 0, 0, 0, 1, 0, 0, 0],
-  ];
-  const exampleGridVertical = [
-    [0, 0, 0, 1, 1, 1, 1, 0, 0, 1],
-    [0, 1, 1, 0, 0, 1, 0, 1, 0, 0],
-    [1, 1, 0, 0, 1, 1, 0, 0, 0, 0],
-    [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
-    [0, 0, 0, 0, 1, 0, 1, 0, 1, 0],
-    [0, 0, 0, 1, 0, 0, 1, 1, 1, 0],
-    [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-    [1, 1, 0, 0, 0, 1, 1, 0, 0, 0],
-    [0, 0, 0, 1, 1, 0, 1, 1, 0, 1],
-  ];
-
-  for (let i = 0; i < 10; i++) {
-    for (let j = 0; j < 9; j++) {
-      if (exampleGridHorizontal[i][j]) {
-        const wallHorizontal = new THREE.Mesh(geometryWallHorizontal, material);
-        wallHorizontal.position.set((i - 4) * 60 - 30, 20, (j - 4) * 60);
-        scene.add(wallHorizontal);
-        walls.push(wallHorizontal);
-      }
-    }
-  }
-
-  for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 10; j++) {
-      if (exampleGridVertical[i][j]) {
-        const wallVertical = new THREE.Mesh(geometryWallVertical, material);
-        wallVertical.position.set((i - 4) * 60, 20, (j - 4) * 60 - 30);
-        scene.add(wallVertical);
-        walls.push(wallVertical);
-      }
-    }
-  }
-}
-
-function createBorderWall() {
-  const geometryWallHorizontal = new THREE.BoxGeometry(544, 40, 4);
-  const geometryWallVertical = new THREE.BoxGeometry(4, 40, 604);
-  const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
-
-  const wallHorizontal1 = new THREE.Mesh(geometryWallHorizontal, material);
-  wallHorizontal1.position.set(-30, 20, -300);
-  scene.add(wallHorizontal1);
-  const wallHorizontal2 = new THREE.Mesh(geometryWallHorizontal, material);
-  wallHorizontal2.position.set(30, 20, 300);
-  scene.add(wallHorizontal2);
-
-  walls.push(wallHorizontal1);
-  walls.push(wallHorizontal2);
-
-  const wallVertical1 = new THREE.Mesh(geometryWallVertical, material);
-  wallVertical1.position.set(-300, 20, 0);
-  scene.add(wallVertical1);
-  const wallVertical2 = new THREE.Mesh(geometryWallVertical, material);
-  wallVertical2.position.set(300, 20, 0);
-  scene.add(wallVertical2);
-
-  walls.push(wallVertical1);
-  walls.push(wallVertical2);
-}
-
-//TODO: add better collision handling with different walls
 function detectWalls() {
-  const loader = new THREE.TextureLoader();
-  loader.load("/assets/labyrinth_01.jpg", function (texture) {
+  clearWalls();
+  loader = new THREE.TextureLoader();
+  loader.load(labyrinthSource, function (texture) {
     // display the image on a plane (for debugging)
-    const planeGeometry = new THREE.PlaneGeometry(540, 600); // Adjust size to match aspect ratio
+    const planeGeometry = new THREE.PlaneGeometry(810, 900); // Adjust size to match aspect ratio
     const planeMaterial = new THREE.MeshBasicMaterial({ map: texture });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.rotation.x = -Math.PI / 2;
@@ -261,8 +241,8 @@ function detectWalls() {
     const wallHeight = 40;
     const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
 
-    const sceneWidth = 540;
-    const sceneHeight = 600;
+    const sceneWidth = 810;
+    const sceneHeight = 900;
 
     const visited = new Array(image.width * image.height).fill(false);
     const wallThickness = 10; // Approximate thickness of walls in pixels
@@ -270,7 +250,7 @@ function detectWalls() {
     for (let y = 0; y < image.height; y++) {
       for (let x = 0; x < image.width; x++) {
         const index = y * image.width + x;
-        if (visited[index] || data[index * 4] > 128) {
+        if (visited[index] || data[index * 4] > 100) {
           continue;
         }
 
@@ -278,7 +258,7 @@ function detectWalls() {
         let w = 0;
         while (
           x + w < image.width &&
-          data[(y * image.width + x + w) * 4] < 128
+          data[(y * image.width + x + w) * 4] < 100
         ) {
           w++;
         }
@@ -286,7 +266,7 @@ function detectWalls() {
         let h_check = 0;
         while (
           y + h_check < image.height &&
-          data[((y + h_check) * image.width + x) * 4] < 128
+          data[((y + h_check) * image.width + x) * 4] < 100
         ) {
           h_check++;
         }
@@ -296,7 +276,7 @@ function detectWalls() {
           while (y + h < image.height) {
             let isWallRow = true;
             for (let i = 0; i < w; i++) {
-              if (data[((y + h) * image.width + x + i) * 4] > 128) {
+              if (data[((y + h) * image.width + x + i) * 4] > 100) {
                 isWallRow = false;
                 break;
               }
@@ -335,7 +315,7 @@ function detectWalls() {
           while (x + w < image.width) {
             let isWallCol = true;
             for (let i = 0; i < h; i++) {
-              if (data[((y + i) * image.width + x + w) * 4] > 128) {
+              if (data[((y + i) * image.width + x + w) * 4] > 100) {
                 isWallCol = false;
                 break;
               }
@@ -435,4 +415,19 @@ function moveCar(direction) {
     car.rotation.set(0, 0, 0);
     car.position.z = car.position.z + 10;
   }
+}
+
+function clearWalls() {
+  walls.forEach((wall) => {
+    scene.remove(wall);
+    if (wall.geometry) wall.geometry.dispose();
+    if (wall.material) {
+      if (Array.isArray(wall.material)) {
+        wall.material.forEach((m) => m.dispose());
+      } else {
+        wall.material.dispose();
+      }
+    }
+  });
+  walls = [];
 }

@@ -15,75 +15,27 @@
     overflow: hidden;
   "
 >
-  <style>
-    #buttonRight {
-      position: absolute;
-      bottom: 60px;
-      right: 20px;
-      z-index: 10;
-      width: 48px;
-      height: 48px;
-      font-size: 20px;
-      background-color: rgba(120, 59, 59, 0.8);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    #buttonLeft {
-      position: absolute;
-      bottom: 60px;
-      right: 100px;
-      z-index: 10;
-      width: 48px;
-      height: 48px;
-      font-size: 20px;
-      background-color: rgba(120, 59, 59, 0.8);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    #buttonUp {
-      position: absolute;
-      bottom: 100px;
-      right: 60px;
-      z-index: 10;
-      width: 48px;
-      height: 48px;
-      font-size: 20px;
-      background-color: rgba(120, 59, 59, 0.8);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    #buttonDown {
-      position: absolute;
-      bottom: 20px;
-      right: 60px;
-      z-index: 10;
-      width: 48px;
-      height: 48px;
-      font-size: 20px;
-      background-color: rgba(120, 59, 59, 0.8);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-
-    #buttonLeft:hover,
-    #buttonRight:hover,
-    #buttonUp:hover,
-    #buttonDown:hover {
-      background-color: rgba(57, 28, 28, 0.8);
-    }
-  </style>
   <button id="buttonRight">&rarr;</button>
   <button id="buttonLeft">&larr;</button>
   <button id="buttonUp">&uarr;</button>
   <button id="buttonDown">&darr;</button>
+  <div id="overlayContainer">
+    <img id="overlayImage" src="/assets/labyrinth_01.jpg" alt="Overlay" />
+    <div id="textButtonContainer">
+      <div id="overlayText">Current Image: labyrinth_01.jpg</div>
+
+      <label for="fileInput" id="fileButton">Choose New Image</label>
+      <input type="file" id="fileInput" accept=".jpg,.jpeg" />
+
+      <label id="takePhotoButton">Take Photo</label>
+
+      <video id="webcam" autoplay playsinline></video>
+      <button id="captureButton">Capture</button>
+    </div>
+  </div>
+
+  <canvas id="snapshotCanvas" style="display: none"></canvas>
   <script src="/libs/ar-threex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/three.js/build/ar-threex.min.js"></script>
   <script type="module" src="src/main.js"></script>
 </body>

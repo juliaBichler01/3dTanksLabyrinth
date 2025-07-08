@@ -5,3 +5,146 @@ body {
 a {
   color: #08f;
 }
+
+#buttonRight {
+  position: absolute;
+  bottom: 60px;
+  right: 20px;
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+  background-color: rgba(120, 59, 59, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+#buttonLeft {
+  position: absolute;
+  bottom: 60px;
+  right: 100px;
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+  background-color: rgba(120, 59, 59, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+#buttonUp {
+  position: absolute;
+  bottom: 100px;
+  right: 60px;
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+  background-color: rgba(120, 59, 59, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+#buttonDown {
+  position: absolute;
+  bottom: 20px;
+  right: 60px;
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+  background-color: rgba(120, 59, 59, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#buttonLeft:hover,
+#buttonRight:hover,
+#buttonUp:hover,
+#buttonDown:hover {
+  background-color: rgba(57, 28, 28, 0.8);
+}
+
+#overlayContainer {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  z-index: 10;
+}
+
+#overlayImage {
+  width: 200px;
+  height: auto;
+  border-radius: 4px;
+  border: solid;
+  border-color: rgba(120, 59, 59, 0.8);
+}
+
+#textButtonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+#overlayText {
+  font-family: Arial;
+  font-size: 15px;
+  color: rgba(120, 59, 59, 0.8);
+  background-color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  width: 340px;
+}
+
+#fileInput {
+  display: none;
+}
+
+#fileButton,
+#takePhotoButton {
+  width: 340px;
+  background-color: rgba(120, 59, 59, 0.8);
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  font-family: Arial;
+  font-size: 15px;
+  cursor: pointer;
+  text-align: center;
+}
+
+#fileButton:hover,
+#takePhotoButton:hover {
+  background-color: rgba(57, 28, 28, 0.8);
+}
+
+#captureButton {
+  display: none; /* Hidden by default */
+  width: 360px;
+  background-color: #dc3545;
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+}
+
+#webcam {
+  display: none;
+  width: 360px;
+  height: auto;
+  border-radius: 6px;
+}
