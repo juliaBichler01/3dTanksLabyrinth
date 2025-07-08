@@ -6,6 +6,7 @@ import "./styles.css";
 window.THREE = THREE;
 
 let camera, renderer, scene, car;
+let walls = [];
 
 // Dynamically load ar-threex.min.js AFTER setting window.THREE
 function loadScript(src) {
@@ -188,6 +189,7 @@ function createWalls() {
         const wallHorizontal = new THREE.Mesh(geometryWallHorizontal, material);
         wallHorizontal.position.set((i - 4) * 60 - 30, 20, (j - 4) * 60);
         scene.add(wallHorizontal);
+        walls.push(wallHorizontal);
       }
     }
   }
@@ -198,6 +200,7 @@ function createWalls() {
         const wallVertical = new THREE.Mesh(geometryWallVertical, material);
         wallVertical.position.set((i - 4) * 60, 20, (j - 4) * 60 - 30);
         scene.add(wallVertical);
+        walls.push(wallVertical);
       }
     }
   }
@@ -215,17 +218,21 @@ function createBorderWall() {
   wallHorizontal2.position.set(30, 20, 300);
   scene.add(wallHorizontal2);
 
+  walls.push(wallHorizontal1);
+  walls.push(wallHorizontal2);
+
   const wallVertical1 = new THREE.Mesh(geometryWallVertical, material);
   wallVertical1.position.set(-300, 20, 0);
   scene.add(wallVertical1);
   const wallVertical2 = new THREE.Mesh(geometryWallVertical, material);
   wallVertical2.position.set(300, 20, 0);
   scene.add(wallVertical2);
+
+  walls.push(wallVertical1);
+  walls.push(wallVertical2);
 }
 
 //TODO: add better collision handling with different walls
-
-let walls = [];
 
 //TODO: function used to test/devolp collision logic. Remove before submitting
 function addWalls() {
