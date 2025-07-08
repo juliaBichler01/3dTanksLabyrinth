@@ -51,10 +51,7 @@ async function init() {
   // create objects in scene
   createBackground();
   createCar();
-  createWalls();
-  createBorderWall();
-
-  getWallBoundingBoxes();
+  detectWalls();
 
   // renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -156,80 +153,126 @@ function createCar() {
   scene.add(car);
 }
 
-function createWalls() {
-  const geometryWallHorizontal = new THREE.BoxGeometry(64, 40, 4);
-  const geometryWallVertical = new THREE.BoxGeometry(4, 40, 64);
-  const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
+function detectWalls() {
+  const loader = new THREE.TextureLoader();
+  loader.load('/assets/labyrinth_01.jpg', function(texture) {
+    // display the image on a plane (for debugging)
+    const planeGeometry = new THREE.PlaneGeometry(540, 600); // Adjust size to match aspect ratio
+    const planeMaterial = new THREE.MeshBasicMaterial({ map: texture });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.rotation.x = -Math.PI / 2;
+    plane.position.y = 1; 
+    scene.add(plane);
 
-  const exampleGridHorizontal = [
-    [1, 0, 0, 0, 0, 0, 0, 1, 0],
-    [1, 1, 0, 1, 0, 1, 0, 1, 0],
-    [0, 0, 1, 1, 0, 0, 1, 1, 1],
-    [1, 0, 1, 1, 0, 1, 1, 0, 1],
-    [1, 1, 1, 0, 1, 1, 0, 1, 1],
-    [1, 1, 1, 0, 1, 1, 0, 0, 0],
-    [0, 1, 0, 1, 1, 1, 0, 1, 1],
-    [0, 0, 1, 1, 1, 0, 1, 1, 1],
-    [0, 1, 1, 0, 1, 0, 0, 1, 0],
-    [1, 0, 0, 0, 0, 1, 0, 0, 0],
-  ];
-  const exampleGridVertical = [
-    [0, 0, 0, 1, 1, 1, 1, 0, 0, 1],
-    [0, 1, 1, 0, 0, 1, 0, 1, 0, 0],
-    [1, 1, 0, 0, 1, 1, 0, 0, 0, 0],
-    [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
-    [0, 0, 0, 0, 1, 0, 1, 0, 1, 0],
-    [0, 0, 0, 1, 0, 0, 1, 1, 1, 0],
-    [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-    [1, 1, 0, 0, 0, 1, 1, 0, 0, 0],
-    [0, 0, 0, 1, 1, 0, 1, 1, 0, 1],
-  ];
+    // Get image data
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    const image = texture.image;
+    canvas.width = image.width;
+    canvas.height = image.height;
+    context.drawImage(image, 0, 0);
 
-  for (let i = 0; i < 10; i++) {
-    for (let j = 0; j < 9; j++) {
-      if (exampleGridHorizontal[i][j]) {
-        const wallHorizontal = new THREE.Mesh(geometryWallHorizontal, material);
-        wallHorizontal.position.set((i - 4) * 60 - 30, 20, (j - 4) * 60);
-        scene.add(wallHorizontal);
-        walls.push(wallHorizontal)
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    const wallHeight = 40;
+    const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
+
+    const sceneWidth = 540;
+    const sceneHeight = 600;
+
+    const visited = new Array(image.width * image.height).fill(false);
+    const wallThickness = 10; // Approximate thickness of walls in pixels
+
+    for (let y = 0; y < image.height; y++) {
+      for (let x = 0; x < image.width; x++) {
+        const index = y * image.width + x;
+        if (visited[index] || data[index * 4] > 128) {
+          continue;
+        }
+
+        // Check for horizontal wall
+        let w = 0;
+        while (x + w < image.width && data[(y * image.width + x + w) * 4] < 128) {
+          w++;
+        }
+
+        let h_check = 0;
+        while (y + h_check < image.height && data[((y + h_check) * image.width + x) * 4] < 128) {
+          h_check++;
+        }
+
+        if (w > wallThickness) {
+          let h = 0;
+          while(y + h < image.height) {
+            let isWallRow = true;
+            for(let i = 0; i < w; i++) {
+              if(data[((y+h) * image.width + x + i) * 4] > 128) {
+                isWallRow = false;
+                break;
+              }
+            }
+            if(isWallRow) h++;
+            else break;
+          }
+
+          if (h > 0) {
+            const wallWidth = (w / image.width) * sceneWidth;
+            const wallDepth = (h / image.height) * sceneHeight;
+            const wallX = ((x + w / 2) / image.width) * sceneWidth - sceneWidth / 2;
+            const wallZ = ((y + h / 2) / image.height) * sceneHeight - sceneHeight / 2;
+
+            const wallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallDepth);
+            const wall = new THREE.Mesh(wallGeometry, material);
+            wall.position.set(wallX, wallHeight / 2, wallZ);
+            scene.add(wall);
+            walls.push(wall);
+
+            for (let i = 0; i < h; i++) {
+              for (let j = 0; j < w; j++) {
+                visited[(y + i) * image.width + (x + j)] = true;
+              }
+            }
+          }
+        } else if (h_check > wallThickness) {
+            let h = h_check;
+            let w = 0;
+            while(x + w < image.width) {
+                let isWallCol = true;
+                for(let i = 0; i < h; i++) {
+                    if(data[((y+i) * image.width + x + w) * 4] > 128) {
+                        isWallCol = false;
+                        break;
+                    }
+                }
+                if(isWallCol) w++;
+                else break;
+            }
+
+            if (w > 0) {
+                const wallWidth = (w / image.width) * sceneWidth;
+                const wallDepth = (h / image.height) * sceneHeight;
+                const wallX = ((x + w / 2) / image.width) * sceneWidth - sceneWidth / 2;
+                const wallZ = ((y + h / 2) / image.height) * sceneHeight - sceneHeight / 2;
+
+                const wallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallDepth);
+                const wall = new THREE.Mesh(wallGeometry, material);
+                wall.position.set(wallX, wallHeight / 2, wallZ);
+                scene.add(wall);
+                walls.push(wall);
+
+                for (let i = 0; i < h; i++) {
+                    for (let j = 0; j < w; j++) {
+                        visited[(y + i) * image.width + (x + j)] = true;
+                    }
+                }
+            }
+        }
       }
     }
-  }
 
-  for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 10; j++) {
-      if (exampleGridVertical[i][j]) {
-        const wallVertical = new THREE.Mesh(geometryWallVertical, material);
-        wallVertical.position.set((i - 4) * 60, 20, (j - 4) * 60 - 30);
-        scene.add(wallVertical);
-        walls.push(wallVertical)
-      }
-    }
-  }
-}
-
-function createBorderWall() {
-  const geometryWallHorizontal = new THREE.BoxGeometry(544, 40, 4);
-  const geometryWallVertical = new THREE.BoxGeometry(4, 40, 604);
-  const material = new THREE.MeshStandardMaterial({ color: 0x73573f });
-
-  const wallHorizontal1 = new THREE.Mesh(geometryWallHorizontal, material);
-  wallHorizontal1.position.set(-30, 20, -300);
-  scene.add(wallHorizontal1);
-  walls.push(wallHorizontal1)
-  const wallHorizontal2 = new THREE.Mesh(geometryWallHorizontal, material);
-  wallHorizontal2.position.set(30, 20, 300);
-  scene.add(wallHorizontal2);
-  walls.push(wallHorizontal2)
-
-  const wallVertical1 = new THREE.Mesh(geometryWallVertical, material);
-  wallVertical1.position.set(-300, 20, 0);
-  scene.add(wallVertical1);
-  walls.push(wallVertical1)
-  const wallVertical2 = new THREE.Mesh(geometryWallVertical, material);
-  wallVertical2.position.set(300, 20, 0);
-  scene.add(wallVertical2);
-  walls.push(wallVertical2)
+    getWallBoundingBoxes();
+  });
 }
 
 function checkForIntersection(direction) {
@@ -263,11 +306,10 @@ function checkForIntersection(direction) {
 }
 
 function getWallBoundingBoxes() {
-
+  wallBoundingBoxes = []; // Clear existing bounding boxes
   for (var i = 0; i < walls.length; i++) {
     let bounding_box = new THREE.Box3();
     bounding_box.setFromObject(walls[i]);
-
     wallBoundingBoxes.push(bounding_box);
   }
 }
